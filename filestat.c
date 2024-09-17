@@ -22,11 +22,10 @@ int ascii_symbols[256] = {0};
 bool word_state = OUT;
 
 int main(int argc, char** argv) {
-    if (argc <= 1) {
-        show_all = true;
-    }
-
+    int _argc = 0;
+    
     for (int i = 1;i < argc;i++) {
+        _argc++;
         if (strcmp(argv[i], "-w") == 0 || strcmp(argv[i], "--word") == 0) {
             count_words = true;
         }
@@ -39,6 +38,13 @@ int main(int argc, char** argv) {
         else if (strcmp(argv[i], "--all") == 0) {
             show_all = true;
         }
+        else {
+            _argc--;
+        }
+    }
+
+    if (_argc == 0) {
+        show_all = true;
     }
 
     while ((c = getchar()) != EOF) {
@@ -53,10 +59,20 @@ int main(int argc, char** argv) {
         }
         if (show_table) {
             if (ignore_register) {
-
+                if (c >= 'a' && c <= 'z') {
+                    latin_lowercase[c - 'a']++;
+                }
+                if (c >= 'A' && c <= 'Z') {
+                    latin_lowercase[c - 'A']++;
+                }
             }
             else {
-
+                if (c >= 'a' && c <= 'z') {
+                    latin_lowercase[c - 'a']++;
+                }
+                if (c >= 'A' && c <= 'Z') {
+                    latin_uppercase[c - 'A']++;
+                }
             }
         }
         if (show_all) {
@@ -64,15 +80,31 @@ int main(int argc, char** argv) {
         }
     }
 
-    if (count_words) {
-        printf(SPLITER_STRING);
-        printf("Total word count - %d\n", word_count);
-    }
     if (show_all) {
         printf(SPLITER_STRING);
         for (int i = 0;i < 256;i++) {
             if (ascii_symbols[i]) {
                 printf("%d - %d\n", i, ascii_symbols[i]);
+            }
+        }
+    }
+    if (count_words) {
+        printf(SPLITER_STRING);
+        printf("Total word count - %d\n", word_count);
+    }
+    if (show_table) {
+        printf(SPLITER_STRING);
+        if (ignore_register) {
+            for (int i = 0;i < 26;i++) {
+                printf("%c - %d\n", i + 'a', latin_lowercase[i]);
+            }
+        }
+        else {
+            for (int i = 0;i < 26;i++) {
+                printf("%c - %d\n", i + 'a', latin_lowercase[i]);
+            }
+            for (int i = 0;i < 26;i++) {
+                printf("%c - %d\n", i + 'A', latin_uppercase[i]);
             }
         }
     }
