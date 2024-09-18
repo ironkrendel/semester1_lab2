@@ -84,7 +84,10 @@ int main(int argc, char** argv) {
         printf(SPLITER_STRING);
         for (int i = 0;i < 256;i++) {
             if (ascii_symbols[i]) {
-                printf("%d - %d\n", i, ascii_symbols[i]);
+                if (i <= 32 || i == 127)
+                    printf("%d - %d\n", i, ascii_symbols[i]);
+                else
+                    printf("%c - %d\n", i, ascii_symbols[i]);
             }
         }
     }
