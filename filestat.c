@@ -49,11 +49,11 @@ int main(int argc, char** argv) {
 
     while ((c = getchar()) != EOF) {
         if (count_words) {
-            if (c != ' ' && word_state == OUT) {
+            if ((c != ' ') && (word_state == OUT)) {
                 word_count++;
                 word_state = IN;
             }
-            else {
+            else if (c == ' ') {
                 word_state = OUT;
             }
         }
