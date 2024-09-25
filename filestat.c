@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
                 free(filepath);
                 return 1;
             }
-            filepath = malloc(sizeof(argv[i]));
+            filepath = malloc(strlen(argv[i]));
             strcpy(filepath, argv[i]);
             _argc--;
         }
