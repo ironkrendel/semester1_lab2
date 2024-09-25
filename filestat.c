@@ -1,6 +1,10 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
 
 #define OUT 0
 #define IN 1
@@ -11,6 +15,7 @@ bool count_words = false;
 bool show_table = false;
 bool ignore_register = false;
 bool show_all = false;
+bool file_passed = false;
 
 char c;
 
@@ -20,6 +25,9 @@ int latin_uppercase[26] = {0};
 int ascii_symbols[256] = {0};
 
 bool word_state = OUT;
+
+char* filepath = NULL;
+int file_index;
 
 int main(int argc, char** argv) {
     int _argc = 0;
@@ -39,15 +47,40 @@ int main(int argc, char** argv) {
             show_all = true;
         }
         else {
+            if (filepath != NULL) {
+                printf("Too much arguments passed.\n");
+                free(filepath);
+                return 1;
+            }
+            filepath = malloc(sizeof(argv[i]));
+            strcpy(filepath, argv[i]);
             _argc--;
         }
+    }
+
+    if (filepath == NULL) {
+        printf("No file provided.\n");
+        free(filepath);
+        return 1;
+    }
+
+    file_index = open(filepath, O_RDONLY);
+
+    if (file_index == -1) {
+        printf("Error when opening file.\n");
+        free(filepath);
+        return 1;
     }
 
     if (_argc == 0) {
         show_all = true;
     }
 
-    while ((c = getchar()) != EOF) {
+    char* buf = malloc(sizeof(char));
+    int err_code;
+
+    while ((err_code = read(file_index, buf, 1)) > 0) {
+        c = *buf;
         if (count_words) {
             if ((c != ' ' && c != '\n') && (word_state == OUT)) {
                 word_count++;
@@ -80,8 +113,18 @@ int main(int argc, char** argv) {
         }
     }
 
+    free(buf);
+    free(filepath);
+    close(file_index);
+
+    if (err_code == -1) {
+        printf("Error when reading file.\n");
+        return 1;
+    }
+
     if (show_all) {
         printf(SPLITER_STRING);
+        printf("Latin characters table.\n");
         for (int i = 0;i < 256;i++) {
             if (ascii_symbols[i]) {
                 if (i <= 32 || i == 127)
@@ -97,17 +140,21 @@ int main(int argc, char** argv) {
     }
     if (show_table) {
         printf(SPLITER_STRING);
+        printf("Symbol table.\n");
         if (ignore_register) {
             for (int i = 0;i < 26;i++) {
-                printf("%c - %d\n", i + 'a', latin_lowercase[i]);
+                if (latin_lowercase[i] > 0)
+                    printf("%c - %d\n", i + 'a', latin_lowercase[i]);
             }
         }
         else {
             for (int i = 0;i < 26;i++) {
-                printf("%c - %d\n", i + 'a', latin_lowercase[i]);
+                if (latin_lowercase[i] > 0)
+                    printf("%c - %d\n", i + 'a', latin_lowercase[i]);
             }
             for (int i = 0;i < 26;i++) {
-                printf("%c - %d\n", i + 'A', latin_uppercase[i]);
+                if (latin_uppercase[i])
+                    printf("%c - %d\n", i + 'A', latin_uppercase[i]);
             }
         }
     }
